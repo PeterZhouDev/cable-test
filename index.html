@@ -254,24 +254,30 @@
                 execute: () => {
                     if (!PrintMgr.validateRequired()) return;
 
-                    // Formats: [date]_[cable ids]_[project]
-                    const dateStr = new Date().toISOString().split('T')[0]; // [date]
-                    const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '_'); // [project]
+                    const dateStr = new Date().toISOString().split('T')[0]; 
+                    const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '_'); 
                     
                     const cableIds = [...document.querySelectorAll('.cable-id-input')]
                         .map(i => i.value.trim().replace(/\W/g, '_'))
                         .filter(Boolean);
                     
-                    let cableStr = cableIds.length ? cableIds.join('-') : 'CABLES'; // [cable ids]
-                    if (cableStr.length > 50) cableStr = cableStr.substring(0, 47) + '...'; // Prevents illegally long filenames
+                    let cableStr = cableIds.length ? cableIds.join('-') : 'CABLES'; 
+                    if (cableStr.length > 50) cableStr = cableStr.substring(0, 47) + '...'; 
                     
-                    // The filename string for the PDF
                     const fileName = `${dateStr}_${cableStr}_${projectStr}`;
-                    
                     const origTitle = document.title;
-                    document.title = fileName; // Browser uses this as default "Save As" name
-                    window.print();
-                    setTimeout(() => document.title = origTitle, 500); 
+                    
+                    // 1. Set the dynamic filename
+                    document.title = fileName; 
+                    
+                    // 2. Add a tiny delay to ensure the browser registers the title change
+                    setTimeout(() => {
+                        window.print();
+                        
+                        // 3. Revert safely after the print dialog resolves
+                        window.addEventListener('afterprint', () => { document.title = origTitle; }, { once: true });
+                        setTimeout(() => { document.title = origTitle; }, 3000); // Safari fallback
+                    }, 100);
                 }
             };
 
