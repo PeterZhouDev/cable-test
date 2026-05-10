@@ -6,9 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamic Cable Test Audit Sheet</title>
 
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    
+    <!-- True PDF Generation Engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -19,45 +23,25 @@
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .signature-pad { touch-action: none; cursor: crosshair; min-height: 120px; min-width: 280px; width: 100%; }
-        .print-img { display: none; }
+        .signature-pad { touch-action: none; cursor: crosshair; min-height: 100px; min-width: 280px; width: 100%; }
         
         .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; transition: 0.2s; }
 
-        @media print {
-            /* Force ISO A4 Paper Size */
-            @page { size: A4 portrait; margin: 6mm; }
-            body { background-color: white !important; padding: 0 !important; font-size: 10px !important; }
-            .no-print, .signature-pad { display: none !important; }
-            
-            .print-img { display: block !important; width: 100%; height: 40px; object-fit: contain; }
-            
-            .print-border-0 { border: none !important; box-shadow: none !important; }
-            .p-6 { padding: 12px !important; }
-            .p-4 { padding: 8px !important; }
-            
-            #cables-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
-
-            .cable-card { 
-                padding: 6px !important; border: 1px solid #9ca3af !important; border-radius: 4px !important;
-                margin-bottom: 0 !important; break-inside: avoid; page-break-inside: avoid;
-            }
-
-            .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 6px !important; }
-            .gap-3 { gap: 4px !important; }
-            
-            input { border-bottom: 1px solid #9ca3af !important; background: transparent !important; font-size: 10px !important; padding: 0 2px !important; height: 16px !important; }
-            .text-sm { font-size: 10px !important; line-height: 1.2 !important; }
-            .text-xs { font-size: 9px !important; line-height: 1.2 !important; }
-            .text-\\[10px\\] { font-size: 8px !important; line-height: 1 !important; }
-            .mt-8 { margin-top: 16px !important; } 
+        /* Temporary PDF scaling class applied during export */
+        .pdf-mode {
+            font-size: 10px !important;
+            padding: 10px !important;
         }
+        .pdf-mode input { border-bottom: 1px solid #9ca3af !important; background: transparent !important; }
+        .pdf-mode .signature-pad { border: none !important; border-bottom: 1px solid #d1d5db !important; }
+        .pdf-mode #cables-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
     </style>
 </head>
 
 <body class="p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-200 print-border-0">
+    <!-- THIS IS THE CONTAINER THAT GETS EXPORTED -->
+    <div id="audit-sheet" class="max-w-5xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-200">
         
         <div class="bg-slate-800 text-white p-4 md:p-6 pb-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -79,15 +63,13 @@
             </div>
 
             <div class="flex flex-wrap gap-6 items-center border-b pb-4">
-                <div class="flex items-center gap-2"><i data-lucide="zap" class="text-yellow-500 w-4 h-4"></i><label class="font-bold text-[10px] uppercase text-gray-500">Test Volts:</label><input type="number" class="border-b border-gray-300 w-20 bg-transparent focus:outline-none text-sm"/></div>
-                <div class="flex items-center gap-2"><i data-lucide="cloud-sun" class="text-blue-500 w-4 h-4"></i><label class="font-bold text-[10px] uppercase text-gray-500">Weather:</label><input type="text" value="Fine" class="border-b border-gray-300 w-24 bg-transparent focus:outline-none text-sm"/></div>
+                <div class="flex items-center gap-2"><i data-lucide="zap" class="text-yellow-500 w-4 h-4 no-pdf"></i><label class="font-bold text-[10px] uppercase text-gray-500">Test Volts:</label><input type="number" class="border-b border-gray-300 w-20 bg-transparent focus:outline-none text-sm"/></div>
+                <div class="flex items-center gap-2"><i data-lucide="cloud-sun" class="text-blue-500 w-4 h-4 no-pdf"></i><label class="font-bold text-[10px] uppercase text-gray-500">Weather:</label><input type="text" value="Fine" class="border-b border-gray-300 w-24 bg-transparent focus:outline-none text-sm"/></div>
             </div>
 
-            <!-- Cables Container -->
             <div id="cables-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
 
-            <!-- Signatures Table -->
-            <div class="mt-6 overflow-x-auto break-inside-avoid shadow-sm rounded-lg border border-gray-200">
+            <div class="mt-6 overflow-x-auto shadow-sm rounded-lg border border-gray-200">
                 <table class="w-full text-xs text-left">
                     <thead class="bg-gray-200 uppercase text-[10px] text-gray-900 font-extrabold tracking-wider">
                         <tr><th class="p-2 border-b w-24">Role</th><th class="p-2 border-b">Name</th><th class="p-2 border-b text-center" style="min-width: 280px;">Signature</th><th class="p-2 border-b w-32">Date</th></tr>
@@ -97,8 +79,7 @@
                             <td class="p-2 font-bold bg-gray-50">TESTER 1</td><td class="p-1 border-r"><input type="text" class="w-full border-none p-1 focus:outline-none bg-transparent"/></td>
                             <td class="p-1.5 border-r text-center relative align-middle">
                                 <canvas class="signature-pad border border-dashed border-gray-300 bg-gray-50 rounded"></canvas>
-                                <img class="print-img" src="" alt="Tester 1 Signature"/>
-                                <button type="button" data-action="clear-signature" class="no-print text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
+                                <button type="button" data-action="clear-signature" class="no-pdf text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
                             </td>
                             <td class="p-1"><input type="date" class="w-full border-none p-1 focus:outline-none bg-transparent text-gray-700"/></td>
                         </tr>
@@ -106,8 +87,7 @@
                             <td class="p-2 font-bold bg-gray-50">TESTER 2</td><td class="p-1 border-r"><input type="text" class="w-full border-none p-1 focus:outline-none bg-transparent"/></td>
                             <td class="p-1.5 border-r text-center relative align-middle">
                                 <canvas class="signature-pad border border-dashed border-gray-300 bg-gray-50 rounded"></canvas>
-                                <img class="print-img" src="" alt="Tester 2 Signature"/>
-                                <button type="button" data-action="clear-signature" class="no-print text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
+                                <button type="button" data-action="clear-signature" class="no-pdf text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
                             </td>
                             <td class="p-1"><input type="date" class="w-full border-none p-1 focus:outline-none bg-transparent text-gray-700"/></td>
                         </tr>
@@ -115,14 +95,14 @@
                 </table>
             </div>
             
-            <div class="mt-3 pt-3"><span class="text-[9px] text-gray-500 font-medium italic leading-tight block">*Expected Loop Resistance = (Length × 2 × 0.01724) / CSA. Calculated assuming standard copper conductors at 20°C. <span class="text-red-600 font-bold">Red</span> indicates values exceeding limits. Tapping MΩ headers or inputs auto-fills 999.</span></div>
+            <div class="mt-3 pt-3"><span class="text-[9px] text-gray-500 font-medium italic leading-tight block">*Expected Loop Resistance = (Length × 2 × 0.01724) / CSA. Calculated assuming standard copper conductors at 20°C. <span class="text-red-600 font-bold">Red</span> indicates values exceeding limits.</span></div>
         </div>
     </div>
 
-    <!-- UI Buttons -->
-    <div class="max-w-5xl mx-auto mt-6 flex flex-wrap justify-between items-center gap-4 no-print pb-12">
+    <!-- MAIN ACTION BUTTONS -->
+    <div class="max-w-5xl mx-auto mt-6 flex flex-wrap justify-between items-center gap-4 pb-12">
         <button type="button" data-action="add-cable" class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-lg text-sm font-extrabold hover:bg-indigo-700 transition-colors shadow-md"><i data-lucide="plus" class="w-4 h-4"></i> ADD CABLE ID</button>
-        <button type="button" data-action="print-sheet" class="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg text-sm font-extrabold hover:bg-slate-900 transition-colors shadow-md"><i data-lucide="file-down" class="w-4 h-4"></i> SAVE AS PDF</button>
+        <button type="button" data-action="export-pdf" id="pdf-btn" class="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg text-sm font-extrabold hover:bg-slate-900 transition-colors shadow-md"><i data-lucide="file-down" class="w-4 h-4"></i> SAVE AS PDF</button>
     </div>
 
     <!-- ========================================== -->
@@ -154,7 +134,7 @@
                 <div class="core-rows-container flex flex-col"></div>
             </div>
             <div class="flex justify-between items-center text-[9px]">
-                <button type="button" data-action="remove-cable" class="no-print text-red-600 hover:text-red-800 font-extrabold uppercase tracking-wider">Remove Cable</button>
+                <button type="button" data-action="remove-cable" class="no-pdf text-red-600 hover:text-red-800 font-extrabold uppercase tracking-wider mt-1">Remove Cable</button>
                 <div class="text-gray-500 font-semibold italic core-counter-text">4 Cores (Max 19)</div>
             </div>
         </div>
@@ -222,17 +202,15 @@
                         cvs.getContext("2d").scale(r, r);
                         
                         if (typeof SignaturePad !== 'undefined') {
-                            cvs.sigPad = new SignaturePad(cvs, { backgroundColor: "rgba(0,0,0,0)" });
-                            cvs.sigPad.addEventListener("endStroke", () => { cvs.nextElementSibling.src = cvs.sigPad.toDataURL(); });
+                            cvs.sigPad = new SignaturePad(cvs, { backgroundColor: "rgba(0,0,0,0)", penColor: "rgb(0, 0, 0)" });
                         }
                         cvs.classList.add('initialized');
                     });
                 },
 
                 clearSignature: (btn) => {
-                    const cvs = btn.previousElementSibling.previousElementSibling;
-                    const img = btn.previousElementSibling;
-                    if(cvs?.sigPad) { cvs.sigPad.clear(); img.src = ""; }
+                    const cvs = btn.previousElementSibling;
+                    if(cvs?.sigPad) cvs.sigPad.clear();
                 }
             };
 
@@ -251,33 +229,64 @@
                     return isValid;
                 },
 
-                execute: () => {
+                exportDirectPDF: async (btn) => {
+                    if (typeof html2pdf === 'undefined') {
+                        alert("PDF library is still loading. Please try again in a second.");
+                        return;
+                    }
                     if (!PrintMgr.validateRequired()) return;
 
-                    const dateStr = new Date().toISOString().split('T')[0]; 
-                    const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '_'); 
-                    
-                    const cableIds = [...document.querySelectorAll('.cable-id-input')]
-                        .map(i => i.value.trim().replace(/\W/g, '_'))
-                        .filter(Boolean);
-                    
-                    let cableStr = cableIds.length ? cableIds.join('-') : 'CABLES'; 
-                    if (cableStr.length > 50) cableStr = cableStr.substring(0, 47) + '...'; 
-                    
-                    const fileName = `${dateStr}_${cableStr}_${projectStr}`;
-                    const origTitle = document.title;
-                    
-                    // 1. Set the dynamic filename
-                    document.title = fileName; 
-                    
-                    // 2. Add a tiny delay to ensure the browser registers the title change
-                    setTimeout(() => {
-                        window.print();
+                    // UI Loading State
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = `GENERATING PDF...`;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.disabled = true;
+
+                    try {
+                        // Create Filename
+                        const dateStr = new Date().toISOString().split('T')[0]; 
+                        const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '_'); 
+                        const cableIds = [...document.querySelectorAll('.cable-id-input')].map(i => i.value.trim().replace(/\W/g, '_')).filter(Boolean);
+                        let cableStr = cableIds.length ? cableIds.join('-') : 'CABLES'; 
+                        if (cableStr.length > 50) cableStr = cableStr.substring(0, 47) + '...'; 
+                        const fileName = `${dateStr}_${cableStr}_${projectStr}.pdf`;
+
+                        const element = document.getElementById('audit-sheet');
                         
-                        // 3. Revert safely after the print dialog resolves
-                        window.addEventListener('afterprint', () => { document.title = origTitle; }, { once: true });
-                        setTimeout(() => { document.title = origTitle; }, 3000); // Safari fallback
-                    }, 100);
+                        // Prepare DOM for Canvas capture
+                        document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
+                        element.classList.add('pdf-mode');
+                        
+                        // Force all inputs to explicitly set their value attributes so html2canvas sees them
+                        document.querySelectorAll('input').forEach(inp => {
+                            inp.setAttribute('value', inp.value);
+                            if(inp.type === 'date') inp.setAttribute('data-date', inp.value);
+                        });
+
+                        // Export Options
+                        const opt = {
+                            margin:       [10, 5, 10, 5],
+                            filename:     fileName,
+                            image:        { type: 'jpeg', quality: 0.98 },
+                            html2canvas:  { scale: 2, useCORS: true, logging: false },
+                            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        };
+
+                        // Generate and Trigger Download
+                        await html2pdf().set(opt).from(element).save();
+
+                    } catch (err) {
+                        console.error(err);
+                        alert("An error occurred while generating the PDF.");
+                    } finally {
+                        // Restore UI State
+                        document.querySelectorAll('.no-pdf').forEach(el => el.style.display = '');
+                        document.getElementById('audit-sheet').classList.remove('pdf-mode');
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.disabled = false;
+                        if (window.lucide) lucide.createIcons();
+                    }
                 }
             };
 
@@ -288,7 +297,7 @@
                 'update-cores': UI.syncCores,
                 'validate-card': UI.validate,
                 'clear-signature': UI.clearSignature,
-                'print-sheet': PrintMgr.execute,
+                'export-pdf': PrintMgr.exportDirectPDF,
                 'auto-fill': el => { if(!el.value) el.value = 999; },
                 'fill-column': el => { 
                     const colIdx = parseInt(el.dataset.colIndex, 10);
@@ -300,13 +309,11 @@
                 } 
             };
 
-            // Delegate Events
             ['click', 'input'].forEach(evtType => {
                 document.addEventListener(evtType, e => {
                     if (evtType === 'input' && e.target.classList.contains('required-input')) {
                         e.target.classList.remove('input-error');
                     }
-
                     const targetBtn = e.target.closest('[data-action]');
                     if (targetBtn && Actions[targetBtn.dataset.action]) {
                         Actions[targetBtn.dataset.action](targetBtn);
