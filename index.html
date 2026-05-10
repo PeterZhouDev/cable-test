@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dynamic Cable Test Audit Sheet</title>
     
+    <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
@@ -25,23 +26,58 @@
         .signature-pad { 
             touch-action: none; 
             cursor: crosshair;
-            min-height: 120px; /* Forced height for mobile signing */
+            min-height: 120px; 
             width: 100%;
         }
 
+        /* ========================================================
+           HIGH-DENSITY PRINT STYLES
+           ======================================================== */
         @media print {
-            @page { size: A4 portrait; margin: 10mm; }
-            body { background-color: white !important; padding: 0 !important; }
+            @page { size: A4 portrait; margin: 6mm; }
+            body { background-color: white !important; padding: 0 !important; font-size: 10px !important; }
             .no-print { display: none !important; }
             .print-border-0 { border: none !important; box-shadow: none !important; }
             
-            .cable-card { 
-                break-inside: avoid;
-                page-break-inside: avoid; 
-                margin-bottom: 1rem !important; 
+            .p-6 { padding: 12px !important; }
+            .p-4 { padding: 8px !important; }
+            
+            #cables-container {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
             }
-            input { border-bottom: 1px solid #9ca3af !important; background: transparent !important; }
-            .signature-pad { border: 1px solid #d1d5db !important; }
+
+            .cable-card { 
+                padding: 6px !important;
+                border: 1px solid #9ca3af !important;
+                border-radius: 4px !important;
+                margin-bottom: 0 !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 6px !important; }
+            .gap-3 { gap: 4px !important; }
+            
+            input { 
+                border-bottom: 1px solid #9ca3af !important; 
+                background: transparent !important; 
+                font-size: 10px !important;
+                padding: 0 2px !important;
+                height: 16px !important;
+            }
+            .text-sm { font-size: 10px !important; line-height: 1.2 !important; }
+            .text-xs { font-size: 9px !important; line-height: 1.2 !important; }
+            .text-\\[10px\\] { font-size: 8px !important; line-height: 1 !important; }
+
+            .signature-pad { 
+                border: none !important; 
+                border-bottom: 1px solid #d1d5db !important; 
+                min-height: 40px !important; 
+                height: 40px !important; 
+            }
+            .mt-8 { margin-top: 16px !important; } 
         }
     </style>
 </head>
@@ -51,84 +87,82 @@
     <div id="audit-sheet" class="max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200 print-border-0">
         
         <!-- Header -->
-        <div class="bg-white border-b border-gray-200 p-6">
+        <div class="bg-white border-b border-gray-200 p-4 md:p-6 pb-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div class="text-center md:text-left">
-                    <h1 class="text-xl font-bold uppercase tracking-wide text-gray-800">Cable Test Audit Sheet</h1>
+                    <h1 class="text-lg md:text-xl font-bold uppercase tracking-wide text-gray-800">Cable Test Audit Sheet</h1>
                 </div>
                 <div class="flex gap-4">
-                    <div class="border p-2 rounded bg-gray-50 text-xs font-semibold">TA 03 B</div>
-                    <div class="border p-2 rounded bg-gray-50 text-xs font-semibold">
-                        SHEET: <input type="text" name="SheetNumber" class="border-b border-gray-400 bg-transparent w-12 text-center focus:outline-none"/>
+                    <div class="border p-1.5 rounded bg-gray-50 text-[10px] font-semibold">TA 03 B</div>
+                    <div class="border p-1.5 rounded bg-gray-50 text-[10px] font-semibold">
+                        SHEET: <input type="text" name="SheetNumber" class="border-b border-gray-400 bg-transparent w-10 text-center focus:outline-none"/>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Meta Data -->
-        <div class="p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+        <div class="p-4 md:p-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <div class="flex items-center gap-2">
-                    <label class="font-semibold text-sm w-24">CLIENT:</label>
-                    <input type="text" name="Client" value="KiwiRail" class="border-b border-gray-300 w-full bg-transparent focus:outline-none"/>
+                    <label class="font-semibold text-xs w-24 text-gray-600">CLIENT:</label>
+                    <input type="text" name="Client" value="KiwiRail" class="border-b border-gray-300 w-full bg-transparent focus:outline-none text-sm"/>
                 </div>
                 <div class="flex items-center gap-2">
-                    <label class="font-semibold text-sm w-32">CWP NUMBER:</label>
-                    <input type="text" name="CWPNumber" class="border-b border-gray-300 w-full bg-transparent focus:outline-none"/>
+                    <label class="font-semibold text-xs w-32 text-gray-600">CWP NUMBER:</label>
+                    <input type="text" name="CWPNumber" class="border-b border-gray-300 w-full bg-transparent focus:outline-none text-sm"/>
                 </div>
                 <div class="flex items-center gap-2 md:col-span-2">
-                    <label class="font-semibold text-sm w-24">PROJECT:</label>
-                    <input type="text" name="Project" class="border-b border-gray-300 w-full bg-transparent focus:outline-none"/>
+                    <label class="font-semibold text-xs w-24 text-gray-600">PROJECT:</label>
+                    <input type="text" id="project-input" name="Project" placeholder="Enter Project Name" class="border-b border-gray-300 w-full bg-transparent focus:outline-none text-sm"/>
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-6 items-center border-b pb-6">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="zap" class="text-yellow-500 w-5 h-5"></i>
-                    <label class="font-bold text-xs uppercase text-gray-500">Test Volts:</label>
-                    <input type="number" name="TestVolts" class="border-b border-gray-300 w-24 bg-transparent focus:outline-none"/>
+            <div class="flex flex-wrap gap-6 items-center border-b pb-4">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="zap" class="text-yellow-500 w-4 h-4"></i>
+                    <label class="font-bold text-[10px] uppercase text-gray-500">Test Volts:</label>
+                    <input type="number" name="TestVolts" class="border-b border-gray-300 w-20 bg-transparent focus:outline-none text-sm"/>
                 </div>
-                <div class="flex items-center gap-3">
-                    <i data-lucide="cloud-sun" class="text-blue-500 w-5 h-5"></i>
-                    <label class="font-bold text-xs uppercase text-gray-500">Weather:</label>
-                    <input type="text" name="Weather" value="Fine" class="border-b border-gray-300 w-32 bg-transparent focus:outline-none"/>
+                <div class="flex items-center gap-2">
+                    <i data-lucide="cloud-sun" class="text-blue-500 w-4 h-4"></i>
+                    <label class="font-bold text-[10px] uppercase text-gray-500">Weather:</label>
+                    <input type="text" name="Weather" value="Fine" class="border-b border-gray-300 w-24 bg-transparent focus:outline-none text-sm"/>
                 </div>
             </div>
 
             <!-- Cables Container -->
-            <div id="cables-container" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Cables injected here by JS -->
+            <div id="cables-container" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Cables injected here -->
             </div>
 
             <!-- Signatures Table -->
-            <div class="mt-8 overflow-x-auto break-inside-avoid">
+            <div class="mt-6 overflow-x-auto break-inside-avoid">
                 <table class="w-full border border-gray-300 text-xs text-left">
-                    <thead class="bg-gray-100 uppercase">
+                    <thead class="bg-gray-100 uppercase text-[10px]">
                         <tr>
-                            <th class="p-2 border w-24"></th>
-                            <th class="p-2 border">NAME</th>
-                            <th class="p-2 border w-72 text-center">SIGNATURE</th>
-                            <th class="p-2 border w-32">DATE</th>
+                            <th class="p-1.5 border w-20"></th>
+                            <th class="p-1.5 border">NAME</th>
+                            <th class="p-1.5 border w-72 text-center">SIGNATURE</th>
+                            <th class="p-1.5 border w-28">DATE</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Tester 1 -->
                         <tr>
-                            <td class="p-2 border font-bold bg-gray-50">TESTER 1</td>
+                            <td class="p-1.5 border font-bold bg-gray-50">TESTER 1</td>
                             <td class="p-1 border"><input type="text" class="w-full border-none p-1 focus:outline-none bg-transparent"/></td>
-                            <td class="p-2 border text-center relative align-middle">
+                            <td class="p-1.5 border text-center relative align-middle bg-white">
                                 <canvas class="signature-pad border border-dashed border-gray-300 bg-gray-50 rounded"></canvas>
-                                <button type="button" onclick="window.clearSignature(this)" class="no-print text-[10px] text-red-500 hover:text-red-700 font-bold uppercase mt-2">Clear Signature</button>
+                                <button type="button" data-action="clear-signature" class="no-print text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
                             </td>
                             <td class="p-1 border"><input type="date" class="w-full border-none p-1 focus:outline-none bg-transparent text-gray-700"/></td>
                         </tr>
-                        <!-- Tester 2 -->
                         <tr>
-                            <td class="p-2 border font-bold bg-gray-50">TESTER 2</td>
+                            <td class="p-1.5 border font-bold bg-gray-50">TESTER 2</td>
                             <td class="p-1 border"><input type="text" class="w-full border-none p-1 focus:outline-none bg-transparent"/></td>
-                            <td class="p-2 border text-center relative align-middle">
+                            <td class="p-1.5 border text-center relative align-middle bg-white">
                                 <canvas class="signature-pad border border-dashed border-gray-300 bg-gray-50 rounded"></canvas>
-                                <button type="button" onclick="window.clearSignature(this)" class="no-print text-[10px] text-red-500 hover:text-red-700 font-bold uppercase mt-2">Clear Signature</button>
+                                <button type="button" data-action="clear-signature" class="no-print text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
                             </td>
                             <td class="p-1 border"><input type="date" class="w-full border-none p-1 focus:outline-none bg-transparent text-gray-700"/></td>
                         </tr>
@@ -136,209 +170,250 @@
                 </table>
             </div>
             
-            <div class="mt-4 border-t pt-4">
-                <span class="text-[10px] text-gray-400 italic leading-tight">
+            <div class="mt-3 border-t pt-3">
+                <span class="text-[9px] text-gray-400 italic leading-tight block">
                     *Expected Loop Resistance = (Length × 2 × 0.01724) / CSA. Calculated assuming standard copper conductors at 20°C. Red highlights indicate values exceeding expected limits.
                 </span>
             </div>
         </div>
     </div>
 
-    <!-- UI Action Buttons -->
+    <!-- Action Buttons -->
     <div class="max-w-5xl mx-auto mt-6 flex flex-wrap justify-between items-center gap-4 no-print pb-12">
-        <button type="button" onclick="window.addCableCard()" class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm">
-            <i data-lucide="plus" class="w-5 h-5"></i> ADD CABLE ID
+        <button type="button" data-action="add-cable" class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> ADD CABLE ID
         </button>
-        <button type="button" onclick="window.triggerPrint()" class="flex items-center gap-2 bg-gray-800 text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-gray-900 transition-colors shadow-lg">
-            <i data-lucide="printer" class="w-5 h-5"></i> SAVE PDF / PRINT
+        <button type="button" data-action="print-sheet" class="flex items-center gap-2 bg-gray-800 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-gray-900 transition-colors shadow-lg">
+            <i data-lucide="file-down" class="w-4 h-4"></i> SAVE PDF / PRINT
         </button>
     </div>
 
-    <!-- GRAPES-JS SAFE JAVASCRIPT (No Templates, Forced Global Scope) -->
+    <!-- ========================================== -->
+    <!-- HTML TEMPLATES                             -->
+    <!-- ========================================== -->
+
+    <template id="tpl-cable-card">
+        <div class="cable-card space-y-3 border border-gray-200 p-3 rounded-xl shadow-sm bg-white">
+            <div class="flex justify-between items-center bg-teal-50 p-2 rounded flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <label class="font-bold text-[10px]">CABLE ID:</label>
+                    <input type="text" class="cable-id-input border rounded px-2 py-0.5 text-xs w-28 bg-white focus:outline-teal-500" placeholder="Enter ID"/>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-x-2 gap-y-3 text-xs">
+                <div class="flex items-center gap-1.5"><span class="font-semibold text-[9px] text-gray-500 w-12">FROM:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
+                <div class="flex items-center gap-1.5"><span class="font-semibold text-[9px] text-gray-500 w-8">TO:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
+                <div class="flex items-center gap-1.5"><span class="font-semibold text-[9px] text-gray-500 w-16">REF CORES:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
+                <div class="flex items-center gap-1.5"><span class="font-semibold text-[9px] text-gray-500 w-12">CORES:</span><input type="number" data-action="update-cores" class="cable-cores border-b border-gray-300 w-full focus:outline-none" min="2" max="19" value="4"/></div>
+                <div class="flex items-center gap-1.5"><span class="font-semibold text-[9px] text-gray-500 w-16">CSA (mm²):</span><input type="number" step="0.1" data-action="validate-card" class="cable-size border-b border-gray-300 w-full focus:outline-none"/></div>
+                <div class="flex items-center gap-1.5"><span class="font-semibold text-[9px] text-gray-500 w-16">LENGTH (m):</span><input type="number" step="0.5" data-action="validate-card" class="cable-length border-b border-gray-300 w-full focus:outline-none"/></div>
+            </div>
+
+            <div class="overflow-hidden border border-gray-200 rounded">
+                <div class="grid grid-cols-6 bg-gray-100 text-[9px] font-bold text-center border-b uppercase text-gray-600">
+                    <div class="p-1 border-r flex flex-col justify-center">No.</div>
+                    <div class="p-1 border-r flex flex-col justify-center">Loop(Ω)</div>
+                    <div class="p-1 border-r flex flex-col justify-center leading-tight">C/C<br><span class="text-[7px] font-normal text-gray-400">(MΩ)</span></div>
+                    <div class="p-1 border-r flex flex-col justify-center leading-tight">C/E<br><span class="text-[7px] font-normal text-gray-400">(MΩ)</span></div>
+                    <div class="p-1 border-r flex flex-col justify-center leading-tight">C/S<br><span class="text-[7px] font-normal text-gray-400">(MΩ)</span></div>
+                    <div class="p-1 flex flex-col justify-center leading-tight">S/E<br><span class="text-[7px] font-normal text-gray-400">(MΩ)</span></div>
+                </div>
+                <div class="core-rows-container flex flex-col"></div>
+            </div>
+            <div class="flex justify-between items-center text-[9px]">
+                <button type="button" data-action="remove-cable" class="no-print text-red-500 hover:text-red-700 font-bold uppercase tracking-wider">Remove Cable</button>
+                <div class="text-gray-400 italic core-counter-text">4 Cores (Max 19)</div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-core-row">
+        <div class="grid grid-cols-6 border-b hover:bg-gray-50 transition-colors core-row text-[10px]">
+            <div class="border-r bg-gray-50 flex justify-center items-center py-0.5 font-bold text-gray-600"><span class="core-number"></span></div>
+            <div class="border-r relative"><input type="number" step="0.01" data-action="validate-card" class="loop-res-input w-full text-center border-none p-0.5 focus:bg-yellow-50 outline-none bg-transparent transition-colors"/></div>
+            <div class="border-r"><input type="number" step="1" class="w-full text-center border-none p-0.5 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
+            <div class="border-r"><input type="number" step="1" class="w-full text-center border-none p-0.5 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
+            <div class="border-r"><input type="number" step="1" class="w-full text-center border-none p-0.5 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
+            <div><input type="number" step="1" class="w-full text-center border-none p-0.5 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
+        </div>
+    </template>
+
+    <!-- ========================================== -->
+    <!-- MAIN JAVASCRIPT                            -->
+    <!-- ========================================== -->
     <script>
-        // Constants
-        window.MIN_CORES = 2;
-        window.MAX_CORES = 19;
+        (function App() {
+            
+            const CONFIG = {
+                MIN_CORES: 2,
+                MAX_CORES: 19,
+                DEFAULT_CORES: 4,
+                COPPER_RESISTIVITY: 0.01724 
+            };
 
-        // HTML STRING TEMPLATES (Bypasses Builder stripping <template> tags)
-        window.getCableHTML = function() {
-            return `
-            <div class="cable-card space-y-4 border border-gray-200 p-4 rounded-xl shadow-sm bg-white">
-                <div class="flex justify-between items-center bg-teal-50 p-3 rounded-lg flex-wrap gap-4">
-                    <div class="flex items-center gap-2">
-                        <label class="font-bold text-xs">CABLE ID:</label>
-                        <input type="text" class="border rounded px-2 py-1 text-sm w-32 bg-white" placeholder="Enter ID"/>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                    <div class="flex items-center gap-2"><span class="font-semibold text-xs text-gray-500">FROM:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
-                    <div class="flex items-center gap-2"><span class="font-semibold text-xs text-gray-500">TO:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
-                    <div class="flex items-center gap-2"><span class="font-semibold text-xs text-gray-500">REF CORES:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
-                    <div class="flex items-center gap-2"><span class="font-semibold text-xs text-gray-500">CORES:</span><input type="number" class="cable-cores border-b border-gray-300 w-full focus:outline-none" min="2" max="19" value="4"/></div>
-                    <div class="flex items-center gap-2"><span class="font-semibold text-xs text-gray-500">CSA (mm²):</span><input type="number" step="0.1" class="cable-size border-b border-gray-300 w-full focus:outline-none"/></div>
-                    <div class="flex items-center gap-2"><span class="font-semibold text-xs text-gray-500">LENGTH (m):</span><input type="number" step="0.5" class="cable-length border-b border-gray-300 w-full focus:outline-none"/></div>
-                </div>
+            const Calc = {
+                getExpectedResistance: (length, csa) => {
+                    if (isNaN(length) || isNaN(csa) || csa <= 0) return Infinity;
+                    return (2 * length * CONFIG.COPPER_RESISTIVITY) / csa;
+                }
+            };
 
-                <div class="overflow-hidden border rounded-lg">
-                    <div class="grid grid-cols-6 bg-gray-100 text-[10px] font-bold text-center border-b uppercase">
-                        <div class="p-2 border-r flex flex-col justify-center">Core No</div>
-                        <div class="p-2 border-r flex flex-col justify-center">Loop (Ω)</div>
-                        <div class="p-1 border-r flex flex-col justify-center leading-tight">C/Core<br><span class="text-[8px] font-normal text-gray-500">(MΩ)</span></div>
-                        <div class="p-1 border-r flex flex-col justify-center leading-tight">C/Earth<br><span class="text-[8px] font-normal text-gray-500">(MΩ)</span></div>
-                        <div class="p-1 border-r flex flex-col justify-center leading-tight">C/Sheath<br><span class="text-[8px] font-normal text-gray-500">(MΩ)</span></div>
-                        <div class="p-1 flex flex-col justify-center leading-tight">S/Earth<br><span class="text-[8px] font-normal text-gray-500">(MΩ)</span></div>
-                    </div>
-                    <div class="core-rows-container flex flex-col"></div>
-                </div>
-                <div class="flex justify-between items-center text-[10px] mt-2">
-                    <button type="button" onclick="window.removeCableCard(this)" class="no-print text-red-500 hover:text-red-700 font-bold uppercase tracking-wider">Remove Cable</button>
-                    <div class="text-gray-400 italic core-counter-text">4 Cores (Max 19)</div>
-                </div>
-            </div>`;
-        };
-
-        window.getCoreRowHTML = function(number) {
-            return `
-            <div class="grid grid-cols-6 border-b hover:bg-gray-50 transition-colors core-row text-xs">
-                <div class="border-r bg-gray-50 flex justify-center items-center py-1 font-bold"><span class="core-number">${number}</span></div>
-                <div class="border-r relative"><input type="number" step="0.01" class="loop-res-input w-full text-center border-none p-1 focus:bg-yellow-50 outline-none bg-transparent transition-colors" oninput="window.validateLoopResistance(this)"/></div>
-                <div class="border-r"><input type="number" step="1" class="w-full text-center border-none p-1 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
-                <div class="border-r"><input type="number" step="1" class="w-full text-center border-none p-1 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
-                <div class="border-r"><input type="number" step="1" class="w-full text-center border-none p-1 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
-                <div><input type="number" step="1" class="w-full text-center border-none p-1 focus:bg-yellow-50 outline-none bg-transparent" placeholder="MΩ"/></div>
-            </div>`;
-        };
-
-        // --- GLOBAL FUNCTIONS ---
-
-        window.triggerPrint = function() {
-            // Checks if running inside an iframe (like a builder) and tries to print the top window
-            if (window.self !== window.top) {
-                window.top.print();
-            } else {
-                window.print();
-            }
-        };
-
-        window.initSignatures = function() {
-            const canvases = document.querySelectorAll('.signature-pad');
-            canvases.forEach(canvas => {
-                if (canvas.sigPad) return; 
-                
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                canvas.getContext("2d").scale(ratio, ratio);
-                
-                if (typeof SignaturePad !== 'undefined') {
-                    canvas.sigPad = new SignaturePad(canvas, {
-                        penColor: "rgb(0, 0, 0)",
-                        backgroundColor: "rgba(0,0,0,0)"
+            const Signatures = {
+                init: () => {
+                    document.querySelectorAll('.signature-pad').forEach(canvas => {
+                        if (canvas.sigPad) return; 
+                        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                        canvas.width = canvas.offsetWidth * ratio;
+                        canvas.height = canvas.offsetHeight * ratio;
+                        canvas.getContext("2d").scale(ratio, ratio);
+                        
+                        if (typeof SignaturePad !== 'undefined') {
+                            canvas.sigPad = new SignaturePad(canvas, { penColor: "rgb(0, 0, 0)", backgroundColor: "rgba(0,0,0,0)" });
+                        }
                     });
+                },
+                clear: (btn) => {
+                    const canvas = btn.previousElementSibling;
+                    if(canvas && canvas.sigPad) canvas.sigPad.clear();
                 }
-            });
-        };
+            };
 
-        window.clearSignature = function(btn) {
-            const canvas = btn.previousElementSibling;
-            if(canvas && canvas.sigPad) {
-                canvas.sigPad.clear();
-            }
-        };
+            const UI = {
+                addCableCard: () => {
+                    const container = document.getElementById('cables-container');
+                    const template = document.getElementById('tpl-cable-card');
+                    if (!container || !template) return;
 
-        window.addCableCard = function() {
-            const container = document.getElementById('cables-container');
-            if (!container) return;
+                    const clone = template.content.cloneNode(true);
+                    const rowsContainer = clone.querySelector('.core-rows-container');
+                    
+                    for (let i = 1; i <= CONFIG.DEFAULT_CORES; i++) {
+                        UI.appendCoreRow(rowsContainer, i);
+                    }
+                    
+                    container.appendChild(clone);
+                    if (window.lucide) lucide.createIcons();
+                },
 
-            // Inject main card
-            container.insertAdjacentHTML('beforeend', window.getCableHTML());
-            const newCard = container.lastElementChild;
-            
-            // Inject 4 default rows
-            const rowsContainer = newCard.querySelector('.core-rows-container');
-            for (let i = 1; i <= 4; i++) {
-                rowsContainer.insertAdjacentHTML('beforeend', window.getCoreRowHTML(i));
-            }
-            
-            // Attach inputs
-            const coresInput = newCard.querySelector('.cable-cores');
-            const sizeInput = newCard.querySelector('.cable-size');
-            const lengthInput = newCard.querySelector('.cable-length');
+                removeCableCard: (btn) => {
+                    if(confirm("Remove this cable test block?")) btn.closest('.cable-card').remove();
+                },
 
-            coresInput.addEventListener('input', (e) => window.updateCoreRows(newCard, e.target.value));
-            sizeInput.addEventListener('input', () => window.validateLoopResistance(newCard));
-            lengthInput.addEventListener('input', () => window.validateLoopResistance(newCard));
-            
-            if (window.lucide) window.lucide.createIcons();
-        };
+                appendCoreRow: (container, number) => {
+                    const template = document.getElementById('tpl-core-row');
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector('.core-number').textContent = number;
+                    container.appendChild(clone);
+                },
 
-        window.removeCableCard = function(btn) {
-            if(confirm("Are you sure you want to remove this cable?")) {
-                btn.closest('.cable-card').remove();
-            }
-        };
+                updateCoreRows: (input) => {
+                    const card = input.closest('.cable-card');
+                    let count = parseInt(input.value);
+                    if (isNaN(count)) return;
+                    
+                    count = Math.min(Math.max(count, CONFIG.MIN_CORES), CONFIG.MAX_CORES);
+                    const container = card.querySelector('.core-rows-container');
+                    const currentCount = container.children.length;
 
-        window.updateCoreRows = function(card, requestedCount) {
-            let count = parseInt(requestedCount);
-            if (isNaN(count)) return;
-            if (count > window.MAX_CORES) count = window.MAX_CORES;
-            if (count < window.MIN_CORES) count = window.MIN_CORES;
+                    if (count > currentCount) {
+                        for (let i = currentCount + 1; i <= count; i++) UI.appendCoreRow(container, i);
+                    } else if (count < currentCount) {
+                        for (let i = currentCount; i > count; i--) container.lastElementChild.remove();
+                    }
+                    
+                    input.value = count;
+                    card.querySelector('.core-counter-text').textContent = `${count} Cores (Max ${CONFIG.MAX_CORES})`;
+                    UI.validateCard(card);
+                },
 
-            const container = card.querySelector('.core-rows-container');
-            const currentCount = container.children.length;
+                validateCard: (triggerElement) => {
+                    const card = triggerElement.closest('.cable-card');
+                    const length = parseFloat(card.querySelector('.cable-length').value);
+                    const size = parseFloat(card.querySelector('.cable-size').value);
+                    const maxExpected = Calc.getExpectedResistance(length, size);
 
-            if (count > currentCount) {
-                for (let i = currentCount + 1; i <= count; i++) {
-                    container.insertAdjacentHTML('beforeend', window.getCoreRowHTML(i));
+                    card.querySelectorAll('.loop-res-input').forEach(input => {
+                        const val = parseFloat(input.value);
+                        if (!isNaN(val) && maxExpected !== Infinity && val > maxExpected) {
+                            input.classList.add('text-red-700', 'bg-red-100', 'font-bold');
+                        } else {
+                            input.classList.remove('text-red-700', 'bg-red-100', 'font-bold');
+                        }
+                    });
+                },
+
+                printSheet: () => {
+                    // 1. Get Date
+                    const today = new Date();
+                    const dateStr = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+                    // 2. Get Project Name
+                    const projectInput = document.getElementById('project-input');
+                    let projectStr = projectInput ? projectInput.value.trim() : '';
+                    projectStr = projectStr.replace(/[^a-zA-Z0-9_-]/g, '') || 'PROJECT';
+
+                    // 3. Get Cable IDs
+                    const cableInputs = document.querySelectorAll('.cable-id-input');
+                    let cableIds = Array.from(cableInputs)
+                        .map(input => input.value.trim().replace(/[^a-zA-Z0-9_-]/g, ''))
+                        .filter(id => id !== '');
+                    
+                    let cableStr = cableIds.length > 0 ? cableIds.join('-') : 'CABLES';
+                    // Trim length if there are too many cables
+                    if (cableStr.length > 40) cableStr = cableStr.substring(0, 37) + '...';
+
+                    // 4. Construct Name (DATE_CABLEIDs_PROJECT)
+                    const fileName = `${dateStr}_${cableStr}_${projectStr}`;
+
+                    // 5. Swap Title, Trigger Print, Revert Title
+                    const originalTitle = document.title;
+                    document.title = fileName;
+
+                    // Execute Print (Browser uses current document.title for the PDF filename)
+                    window.print();
+
+                    // Instantly revert to standard title once dialog is closed/opened
+                    setTimeout(() => { document.title = originalTitle; }, 500);
                 }
-            } else if (count < currentCount) {
-                for (let i = currentCount; i > count; i--) {
-                    container.lastElementChild.remove();
-                }
-            }
-            
-            card.querySelector('.cable-cores').value = count;
-            card.querySelector('.core-counter-text').textContent = `${count} Cores (Max ${window.MAX_CORES})`;
-            window.validateLoopResistance(card);
-        };
+            };
 
-        window.validateLoopResistance = function(element) {
-            const card = element.classList && element.classList.contains('cable-card') ? element : element.closest('.cable-card');
-            if(!card) return;
+            const bindEvents = () => {
+                document.addEventListener('click', (e) => {
+                    const actionElement = e.target.closest('[data-action]');
+                    if (!actionElement) return;
 
-            const lengthInput = card.querySelector('.cable-length');
-            const sizeInput = card.querySelector('.cable-size');
-            const loopInputs = card.querySelectorAll('.loop-res-input');
-            
-            const length = parseFloat(lengthInput.value);
-            const size = parseFloat(sizeInput.value);
-            
-            const hasValidParams = !isNaN(length) && !isNaN(size) && size > 0;
-            let maxExpected = Infinity;
-            
-            if (hasValidParams) {
-                maxExpected = (2 * length * 0.01724) / size;
-            }
+                    const action = actionElement.dataset.action;
+                    switch(action) {
+                        case 'add-cable': UI.addCableCard(); break;
+                        case 'remove-cable': UI.removeCableCard(actionElement); break;
+                        case 'clear-signature': Signatures.clear(actionElement); break;
+                        case 'print-sheet': UI.printSheet(); break;
+                    }
+                });
 
-            loopInputs.forEach(input => {
-                const val = parseFloat(input.value);
-                if (!isNaN(val) && hasValidParams && val > maxExpected) {
-                    input.classList.add('text-red-700', 'bg-red-100', 'font-bold');
-                } else {
-                    input.classList.remove('text-red-700', 'bg-red-100', 'font-bold');
-                }
-            });
-        };
+                document.addEventListener('input', (e) => {
+                    const actionElement = e.target.closest('[data-action]');
+                    if (!actionElement) return;
 
-        // --- INIT ---
-        // Handles initial load dynamically depending on how the builder renders
-        setTimeout(() => {
-            window.addCableCard();
-            window.initSignatures();
-            if(window.lucide) window.lucide.createIcons();
-        }, 300); // Slight delay ensures DOM is fully painted in GrapesJS before binding
+                    const action = actionElement.dataset.action;
+                    switch(action) {
+                        case 'update-cores': UI.updateCoreRows(actionElement); break;
+                        case 'validate-card': UI.validateCard(actionElement); break;
+                    }
+                });
+            };
 
+            const init = () => {
+                bindEvents();
+                UI.addCableCard(); 
+                Signatures.init(); 
+                if(window.lucide) lucide.createIcons();
+            };
+
+            document.addEventListener('DOMContentLoaded', init);
+
+        })();
     </script>
 </body>
 </html>
