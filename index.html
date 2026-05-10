@@ -25,6 +25,7 @@
         .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; transition: 0.2s; }
 
         @media print {
+            /* Force ISO A4 Paper Size */
             @page { size: A4 portrait; margin: 6mm; }
             body { background-color: white !important; padding: 0 !important; font-size: 10px !important; }
             .no-print, .signature-pad { display: none !important; }
@@ -121,7 +122,7 @@
     <!-- UI Buttons -->
     <div class="max-w-5xl mx-auto mt-6 flex flex-wrap justify-between items-center gap-4 no-print pb-12">
         <button type="button" data-action="add-cable" class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-lg text-sm font-extrabold hover:bg-indigo-700 transition-colors shadow-md"><i data-lucide="plus" class="w-4 h-4"></i> ADD CABLE ID</button>
-        <button type="button" data-action="print-sheet" class="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg text-sm font-extrabold hover:bg-slate-900 transition-colors shadow-md"><i data-lucide="file-down" class="w-4 h-4"></i> SAVE PDF / PRINT</button>
+        <button type="button" data-action="print-sheet" class="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg text-sm font-extrabold hover:bg-slate-900 transition-colors shadow-md"><i data-lucide="file-down" class="w-4 h-4"></i> SAVE AS PDF</button>
     </div>
 
     <!-- ========================================== -->
@@ -253,13 +254,22 @@
                 execute: () => {
                     if (!PrintMgr.validateRequired()) return;
 
-                    const dateStr = new Date().toISOString().split('T')[0];
-                    const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '');
-                    const cableIds = [...document.querySelectorAll('.cable-id-input')].map(i => i.value.replace(/\W/g, '')).filter(Boolean);
-                    const cableStr = cableIds.length ? cableIds.join('-').substring(0, 37) : 'CABLES';
+                    // Formats: [date]_[cable ids]_[project]
+                    const dateStr = new Date().toISOString().split('T')[0]; // [date]
+                    const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '_'); // [project]
+                    
+                    const cableIds = [...document.querySelectorAll('.cable-id-input')]
+                        .map(i => i.value.trim().replace(/\W/g, '_'))
+                        .filter(Boolean);
+                    
+                    let cableStr = cableIds.length ? cableIds.join('-') : 'CABLES'; // [cable ids]
+                    if (cableStr.length > 50) cableStr = cableStr.substring(0, 47) + '...'; // Prevents illegally long filenames
+                    
+                    // The filename string for the PDF
+                    const fileName = `${dateStr}_${cableStr}_${projectStr}`;
                     
                     const origTitle = document.title;
-                    document.title = `${dateStr}_${cableStr}_${projectStr}`;
+                    document.title = fileName; // Browser uses this as default "Save As" name
                     window.print();
                     setTimeout(() => document.title = origTitle, 500); 
                 }
@@ -273,9 +283,8 @@
                 'validate-card': UI.validate,
                 'clear-signature': UI.clearSignature,
                 'print-sheet': PrintMgr.execute,
-                'auto-fill': el => { if(!el.value) el.value = 999; }, // Single tap
+                'auto-fill': el => { if(!el.value) el.value = 999; },
                 'fill-column': el => { 
-                    // Fill entire column when header is tapped
                     const colIdx = parseInt(el.dataset.colIndex, 10);
                     const card = el.closest('.cable-card');
                     card.querySelectorAll('.core-row').forEach(row => {
@@ -288,7 +297,6 @@
             // Delegate Events
             ['click', 'input'].forEach(evtType => {
                 document.addEventListener(evtType, e => {
-                    // Instantly clear error styling when a user starts typing
                     if (evtType === 'input' && e.target.classList.contains('required-input')) {
                         e.target.classList.remove('input-error');
                     }
