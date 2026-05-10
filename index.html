@@ -130,9 +130,20 @@
                 <div class="flex items-center gap-1.5"><span class="font-bold text-[9px] text-gray-600 w-12">FROM:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
                 <div class="flex items-center gap-1.5"><span class="font-bold text-[9px] text-gray-600 w-8">TO:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
                 <div class="flex items-center gap-1.5"><span class="font-bold text-[9px] text-gray-600 w-16">REF CORES:</span><input type="text" class="border-b border-gray-300 w-full focus:outline-none"/></div>
-                <div class="flex items-center gap-1.5"><span class="font-bold text-[9px] text-gray-600 w-12">CORES:</span><input type="number" data-action="update-cores" class="cable-cores border-b border-gray-300 w-full focus:outline-none font-bold text-indigo-700" min="2" max="19" value="4"/></div>
                 <div class="flex items-center gap-1.5"><span class="font-bold text-[9px] text-gray-600 w-16">CSA (mm²):</span><input type="number" step="0.1" data-action="validate-card" class="cable-size required-input border-b border-gray-400 w-full focus:outline-none" placeholder="(Req)"/></div>
                 <div class="flex items-center gap-1.5"><span class="font-bold text-[9px] text-gray-600 w-16">LENGTH (m):</span><input type="number" step="0.5" data-action="validate-card" class="cable-length required-input border-b border-gray-400 w-full focus:outline-none" placeholder="(Req)"/></div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1">
+                <span class="font-bold text-[9px] text-gray-600 shrink-0">CORES:</span>
+                <button type="button" data-action="set-cores" data-count="2"  class="core-preset-btn px-1.5 py-0.5 text-[9px] font-bold border border-gray-300 rounded hover:border-indigo-500 hover:text-indigo-700 transition-colors">2</button>
+                <button type="button" data-action="set-cores" data-count="3"  class="core-preset-btn px-1.5 py-0.5 text-[9px] font-bold border border-gray-300 rounded hover:border-indigo-500 hover:text-indigo-700 transition-colors">3</button>
+                <button type="button" data-action="set-cores" data-count="4"  class="core-preset-btn px-1.5 py-0.5 text-[9px] font-bold border border-gray-300 rounded hover:border-indigo-500 hover:text-indigo-700 transition-colors">4</button>
+                <button type="button" data-action="set-cores" data-count="7"  class="core-preset-btn px-1.5 py-0.5 text-[9px] font-bold border border-gray-300 rounded hover:border-indigo-500 hover:text-indigo-700 transition-colors">7</button>
+                <button type="button" data-action="set-cores" data-count="12" class="core-preset-btn px-1.5 py-0.5 text-[9px] font-bold border border-gray-300 rounded hover:border-indigo-500 hover:text-indigo-700 transition-colors">12</button>
+                <button type="button" data-action="set-cores" data-count="19" class="core-preset-btn px-1.5 py-0.5 text-[9px] font-bold border border-gray-300 rounded hover:border-indigo-500 hover:text-indigo-700 transition-colors">19</button>
+                <span class="text-[9px] text-gray-400">|</span>
+                <input type="number" data-action="update-cores" class="cable-cores border-b border-gray-300 w-10 focus:outline-none font-bold text-indigo-700 text-[9px] text-center" min="2" max="50" placeholder="?"/>
+                <span class="text-[9px] text-gray-500 italic">custom</span>
             </div>
             <div class="overflow-hidden border border-gray-300 rounded">
                 <div class="grid grid-cols-6 bg-gray-200 text-[9px] font-extrabold text-center border-b uppercase text-gray-800 tracking-wide select-none">
@@ -147,7 +158,7 @@
             </div>
             <div class="flex justify-between items-center text-[9px]">
                 <button type="button" data-action="remove-cable" class="no-pdf text-red-600 hover:text-red-800 font-extrabold uppercase tracking-wider mt-1">Remove Cable</button>
-                <div class="text-gray-500 font-semibold italic core-counter-text">4 Cores (Max 19)</div>
+                <div class="text-gray-500 font-semibold italic core-counter-text">4 Cores</div>
             </div>
         </div>
     </template>
@@ -168,7 +179,7 @@
     <!-- ========================================== -->
     <script>
         (function App() {
-            const CFG = { MIN: 2, MAX: 19, DEFAULT: 4, RESISTIVITY: 0.01724 };
+            const CFG = { MIN: 2, MAX: 50, DEFAULT: 4, RESISTIVITY: 0.01724 };
             const cloneTpl = id => document.getElementById(id).content.cloneNode(true);
 
             const UI = {
@@ -182,7 +193,16 @@
                     const card = input.closest('.cable-card');
                     const count = Math.max(CFG.MIN, Math.min(parseInt(input.value) || CFG.DEFAULT, CFG.MAX)); 
                     input.value = count;
-                    card.querySelector('.core-counter-text').textContent = `${count} Cores (Max ${CFG.MAX})`;
+                    card.querySelector('.core-counter-text').textContent = `${count} Cores`;
+
+                    card.querySelectorAll('.core-preset-btn').forEach(btn => {
+                        const active = parseInt(btn.dataset.count) === count;
+                        btn.classList.toggle('border-indigo-600', active);
+                        btn.classList.toggle('text-indigo-700', active);
+                        btn.classList.toggle('bg-indigo-50', active);
+                        btn.classList.toggle('border-gray-300', !active);
+                        btn.classList.toggle('text-gray-700', !active);
+                    });
                     
                     const container = card.querySelector('.core-rows-container');
                     while (container.children.length < count) {
@@ -322,6 +342,12 @@
             const Actions = {
                 'add-cable': UI.addCable,
                 'remove-cable': el => el.closest('.cable-card').remove(),
+                'set-cores': el => {
+                    const card = el.closest('.cable-card');
+                    const coresInput = card.querySelector('.cable-cores');
+                    coresInput.value = el.dataset.count;
+                    UI.syncCores(coresInput);
+                },
                 'update-cores': UI.syncCores,
                 'validate-card': UI.validate,
                 'clear-signature': UI.clearSignature,
