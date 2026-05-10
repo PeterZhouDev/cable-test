@@ -10,8 +10,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-    
-    <!-- True PDF Generation Engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -27,21 +25,29 @@
         
         .input-error { border-color: #ef4444 !important; background-color: #fef2f2 !important; transition: 0.2s; }
 
-        /* Temporary PDF scaling class applied during export */
+        /* Hide the print images during normal web viewing */
+        .signature-img { display: none; width: 100%; height: 50px; object-fit: contain; }
+
+        /* ========================================================
+           PDF EXPORT OVERRIDES (Fixes blank space & scaling)
+           ======================================================== */
         .pdf-mode {
             font-size: 10px !important;
+            margin: 0 !important; /* Fixes "halfway down page" issue */
             padding: 10px !important;
+            max-width: none !important; /* Overrides mx-auto constraints */
+            border: none !important;
+            box-shadow: none !important;
         }
         .pdf-mode input { border-bottom: 1px solid #9ca3af !important; background: transparent !important; }
-        .pdf-mode .signature-pad { border: none !important; border-bottom: 1px solid #d1d5db !important; }
         .pdf-mode #cables-container { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
     </style>
 </head>
 
 <body class="p-4 md:p-8">
 
-    <!-- THIS IS THE CONTAINER THAT GETS EXPORTED -->
-    <div id="audit-sheet" class="max-w-5xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-200">
+    <!-- EXPORT CONTAINER -->
+    <div id="audit-sheet" class="max-w-5xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden border border-gray-200 my-4">
         
         <div class="bg-slate-800 text-white p-4 md:p-6 pb-4">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -75,18 +81,24 @@
                         <tr><th class="p-2 border-b w-24">Role</th><th class="p-2 border-b">Name</th><th class="p-2 border-b text-center" style="min-width: 280px;">Signature</th><th class="p-2 border-b w-32">Date</th></tr>
                     </thead>
                     <tbody class="bg-white">
+                        <!-- TESTER 1 -->
                         <tr class="border-b">
                             <td class="p-2 font-bold bg-gray-50">TESTER 1</td><td class="p-1 border-r"><input type="text" class="w-full border-none p-1 focus:outline-none bg-transparent"/></td>
                             <td class="p-1.5 border-r text-center relative align-middle">
                                 <canvas class="signature-pad border border-dashed border-gray-300 bg-gray-50 rounded"></canvas>
+                                <!-- Hidden image used only for PDF export -->
+                                <img class="signature-img" src="" alt=""/>
                                 <button type="button" data-action="clear-signature" class="no-pdf text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
                             </td>
                             <td class="p-1"><input type="date" class="w-full border-none p-1 focus:outline-none bg-transparent text-gray-700"/></td>
                         </tr>
+                        <!-- TESTER 2 -->
                         <tr>
                             <td class="p-2 font-bold bg-gray-50">TESTER 2</td><td class="p-1 border-r"><input type="text" class="w-full border-none p-1 focus:outline-none bg-transparent"/></td>
                             <td class="p-1.5 border-r text-center relative align-middle">
                                 <canvas class="signature-pad border border-dashed border-gray-300 bg-gray-50 rounded"></canvas>
+                                <!-- Hidden image used only for PDF export -->
+                                <img class="signature-img" src="" alt=""/>
                                 <button type="button" data-action="clear-signature" class="no-pdf text-[9px] text-red-500 hover:text-red-700 font-bold uppercase mt-1">Clear</button>
                             </td>
                             <td class="p-1"><input type="date" class="w-full border-none p-1 focus:outline-none bg-transparent text-gray-700"/></td>
@@ -95,11 +107,11 @@
                 </table>
             </div>
             
-            <div class="mt-3 pt-3"><span class="text-[9px] text-gray-500 font-medium italic leading-tight block">*Expected Loop Resistance = (Length × 2 × 0.01724) / CSA. Calculated assuming standard copper conductors at 20°C. <span class="text-red-600 font-bold">Red</span> indicates values exceeding limits.</span></div>
+            <div class="mt-3 pt-3"><span class="text-[9px] text-gray-500 font-medium italic leading-tight block">*Expected Loop Resistance = (Length × 2 × 0.01724) / CSA. Calculated assuming standard copper conductors at 20°C. <span class="text-red-600 font-bold">Red</span> indicates values exceeding limits. Tapping MΩ columns auto-fills 999.</span></div>
         </div>
     </div>
 
-    <!-- MAIN ACTION BUTTONS -->
+    <!-- UI BUTTONS -->
     <div class="max-w-5xl mx-auto mt-6 flex flex-wrap justify-between items-center gap-4 pb-12">
         <button type="button" data-action="add-cable" class="flex items-center gap-2 bg-indigo-600 text-white px-5 py-3 rounded-lg text-sm font-extrabold hover:bg-indigo-700 transition-colors shadow-md"><i data-lucide="plus" class="w-4 h-4"></i> ADD CABLE ID</button>
         <button type="button" data-action="export-pdf" id="pdf-btn" class="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-lg text-sm font-extrabold hover:bg-slate-900 transition-colors shadow-md"><i data-lucide="file-down" class="w-4 h-4"></i> SAVE AS PDF</button>
@@ -126,10 +138,10 @@
                 <div class="grid grid-cols-6 bg-gray-200 text-[9px] font-extrabold text-center border-b uppercase text-gray-800 tracking-wide select-none">
                     <div class="p-1 border-r border-gray-300 flex flex-col justify-center">No.</div>
                     <div class="p-1 border-r border-gray-300 flex flex-col justify-center">Loop(Ω)</div>
-                    <div class="p-1 border-r border-gray-300 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors active:bg-gray-400" data-action="fill-column" data-col-index="2" title="Tap to fill column with 999">C/C<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
-                    <div class="p-1 border-r border-gray-300 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors active:bg-gray-400" data-action="fill-column" data-col-index="3" title="Tap to fill column with 999">C/E<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
-                    <div class="p-1 border-r border-gray-300 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors active:bg-gray-400" data-action="fill-column" data-col-index="4" title="Tap to fill column with 999">C/S<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
-                    <div class="p-1 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors active:bg-gray-400" data-action="fill-column" data-col-index="5" title="Tap to fill column with 999">S/E<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
+                    <div class="p-1 border-r border-gray-300 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors" data-action="fill-column" data-col-index="2">C/C<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
+                    <div class="p-1 border-r border-gray-300 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors" data-action="fill-column" data-col-index="3">C/E<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
+                    <div class="p-1 border-r border-gray-300 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors" data-action="fill-column" data-col-index="4">C/S<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
+                    <div class="p-1 flex flex-col justify-center leading-tight cursor-pointer hover:bg-gray-300 transition-colors" data-action="fill-column" data-col-index="5">S/E<br><span class="text-[7px] font-bold text-gray-500">(MΩ)</span></div>
                 </div>
                 <div class="core-rows-container flex flex-col"></div>
             </div>
@@ -202,14 +214,14 @@
                         cvs.getContext("2d").scale(r, r);
                         
                         if (typeof SignaturePad !== 'undefined') {
-                            cvs.sigPad = new SignaturePad(cvs, { backgroundColor: "rgba(0,0,0,0)", penColor: "rgb(0, 0, 0)" });
+                            cvs.sigPad = new SignaturePad(cvs, { penColor: "rgb(0, 0, 0)", backgroundColor: "rgba(0,0,0,0)" });
                         }
                         cvs.classList.add('initialized');
                     });
                 },
 
                 clearSignature: (btn) => {
-                    const cvs = btn.previousElementSibling;
+                    const cvs = btn.previousElementSibling.previousElementSibling;
                     if(cvs?.sigPad) cvs.sigPad.clear();
                 }
             };
@@ -231,19 +243,18 @@
 
                 exportDirectPDF: async (btn) => {
                     if (typeof html2pdf === 'undefined') {
-                        alert("PDF library is still loading. Please try again in a second.");
+                        alert("PDF engine is loading. Please try again in a moment.");
                         return;
                     }
                     if (!PrintMgr.validateRequired()) return;
 
-                    // UI Loading State
+                    // Setup button UI
                     const originalHtml = btn.innerHTML;
                     btn.innerHTML = `GENERATING PDF...`;
-                    btn.classList.add('opacity-50', 'cursor-not-allowed');
                     btn.disabled = true;
 
                     try {
-                        // Create Filename
+                        // 1. Build Filename
                         const dateStr = new Date().toISOString().split('T')[0]; 
                         const projectStr = (document.getElementById('project-input')?.value || 'PROJECT').replace(/\W/g, '_'); 
                         const cableIds = [...document.querySelectorAll('.cable-id-input')].map(i => i.value.trim().replace(/\W/g, '_')).filter(Boolean);
@@ -253,37 +264,54 @@
 
                         const element = document.getElementById('audit-sheet');
                         
-                        // Prepare DOM for Canvas capture
-                        document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
-                        element.classList.add('pdf-mode');
+                        // 2. Fix PDF Rendering Issues
+                        // Reset scroll to prevent top cutoff
+                        window.scrollTo(0, 0); 
                         
-                        // Force all inputs to explicitly set their value attributes so html2canvas sees them
-                        document.querySelectorAll('input').forEach(inp => {
-                            inp.setAttribute('value', inp.value);
-                            if(inp.type === 'date') inp.setAttribute('data-date', inp.value);
+                        // Apply specific PDF layout fixes
+                        element.classList.add('pdf-mode');
+                        document.querySelectorAll('.no-pdf').forEach(el => el.style.display = 'none');
+                        
+                        // Bind HTML values so library captures user text
+                        document.querySelectorAll('input').forEach(inp => { inp.setAttribute('value', inp.value); });
+
+                        // SWAP TECHNIQUE: html2canvas drops blank canvases. We must swap to flat images before capturing.
+                        document.querySelectorAll('.signature-pad').forEach(cvs => {
+                            const img = cvs.nextElementSibling;
+                            // If empty, pass a transparent 1px image. Otherwise pass signature data.
+                            img.src = cvs.sigPad && !cvs.sigPad.isEmpty() 
+                                ? cvs.sigPad.toDataURL() 
+                                : "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; 
+                            cvs.style.display = 'none';
+                            img.style.display = 'block';
                         });
 
-                        // Export Options
+                        // 3. Render and Save
                         const opt = {
                             margin:       [10, 5, 10, 5],
                             filename:     fileName,
                             image:        { type: 'jpeg', quality: 0.98 },
-                            html2canvas:  { scale: 2, useCORS: true, logging: false },
+                            html2canvas:  { scale: 2, scrollY: 0 }, // scrollY:0 enforces top boundary
                             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                         };
 
-                        // Generate and Trigger Download
                         await html2pdf().set(opt).from(element).save();
 
                     } catch (err) {
                         console.error(err);
-                        alert("An error occurred while generating the PDF.");
+                        alert("An error occurred during PDF generation.");
                     } finally {
-                        // Restore UI State
+                        // 4. Cleanup & Restore UI
                         document.querySelectorAll('.no-pdf').forEach(el => el.style.display = '');
-                        document.getElementById('audit-sheet').classList.remove('pdf-mode');
+                        element.classList.remove('pdf-mode');
+                        
+                        // Restore interactive canvases
+                        document.querySelectorAll('.signature-pad').forEach(cvs => {
+                            cvs.style.display = 'block';
+                            cvs.nextElementSibling.style.display = 'none';
+                        });
+
                         btn.innerHTML = originalHtml;
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
                         btn.disabled = false;
                         if (window.lucide) lucide.createIcons();
                     }
